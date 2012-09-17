@@ -37,6 +37,7 @@ class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double
           reporter.totalEntryCount = i
         } finally finished.set(true)
       }
+      producer.setDaemon(true) // So the producer won't be blocked forever if the consumer threw an exception
       producer.start()
       for (line <- new BlockingQueueTraversable(buffer, finished)) {
         classifyEntry(line)
