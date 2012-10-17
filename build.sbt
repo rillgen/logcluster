@@ -7,8 +7,8 @@ scalaVersion := "2.9.2"
 version := "0.1-SNAPSHOT"
 
 resolvers += "sonatype-public" at "https://oss.sonatype.org/content/groups/public"
-
-publishTo := Some("Despegar Nexus" at "http://vmtilcara.servers.despegar.it:8080/nexus/content/repositories/snapshots/")
+  
+publishTo := Some("nexus-snapshots" at "http://nexus.despegar.it:8080/nexus/content/repositories/snapshots/")
 
 libraryDependencies ++= 
   "org.clapper" %% "grizzled-slf4j" % "0.6.9" ::

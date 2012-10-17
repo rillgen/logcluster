@@ -34,7 +34,7 @@ class Reporter(title: String, dir: File) extends Logging {
     ".example       { word-wrap: break-word; font-size: 8pt; font-family: monospace } " +
     ".odd           { background-color: rgb(245,245,245) } " +
     "h1             { font-size: 14pt } " +
-    "table          { margin-top: 13px } " +
+    "table          { margin-top: 13px; margin-bottom: 10px } " +
     "table td       { padding: 2px 4px } " +
     "table thead td { font-weight: bold } "
 
@@ -62,6 +62,7 @@ class Reporter(title: String, dir: File) extends Logging {
     }
     file.write("</tbody>")
     file.write("</table>")
+    file.write("""<div class="footer">Powered by <a href="https://github.com/despegar/logcluster">logcluster</a></div>""")
     file.write("</body>")
     file.write("</html>")
     file.close()
