@@ -24,7 +24,7 @@ class CachingDistance(val impl: (IndexedSeq[Any], IndexedSeq[Any], Double) => Do
   
   def apply(a: IndexedSeq[Any], b: IndexedSeq[Any], stopDistance: Double): Double = {
     try cache.get((a, b), () => impl(a, b, stopDistance).asInstanceOf[java.lang.Double])
-    finally logIfRelevant(cache.stats.requestCount().toInt)(c => logStats())
+    finally logIfRelevant(cache.stats.requestCount())(c => logStats())
   }
   
   def logStats() { 

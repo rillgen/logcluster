@@ -15,7 +15,7 @@ class Reporter(title: String, dir: File) extends Logging {
 
   val clusters = new scala.collection.mutable.HashMap[String, (Cluster, PrintStream)]
 
-  var totalEntryCount = 0
+  var totalEntryCount = 0L
   
   def newCluster(cluster: Cluster) {
     val file =  new PrintStream(new FileOutputStream(new File(dir, cluster.id)))

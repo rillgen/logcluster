@@ -23,12 +23,12 @@ class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double
 
   def doIt(lines: Iterator[String]) = {
     logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format (preproc.getClass.getSimpleName, minSimil))
-    var errorCount = 0
+    var errorCount = 0L
     val time = getExecTime {
       val finished = new AtomicBoolean
       val producer = newThread("reader-%s" format logFile) {
         try {
-          var i = 0
+          var i = 0L
           for (line <- lines.map(preproc(_))) {
             logIfRelevant(i + 1)(c => logger.debug("Processed %d lines" format c))
             line.foreach(buffer.put(_))

@@ -62,7 +62,7 @@ package object util extends Logging {
     finally if (resource != null) resource.close()
   }
   
-  def logIfRelevant(c: Int)(f: Int => Unit) = {
+  def logIfRelevant(c: Long)(f: Long => Unit) = {
     if (c < 100 && c % 10 == 0 || 
         c < 1000 && c % 100 == 0 || 
         c < 10000 && c % 1000 == 0 || 
