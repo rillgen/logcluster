@@ -1,6 +1,6 @@
 package logcluster.alg
 
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 class Cluster(val id: String, val example: String, val fundadoid: IndexedSeq[String], val minSimilarity: Double) {
   

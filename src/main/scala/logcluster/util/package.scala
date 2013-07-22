@@ -7,8 +7,8 @@ import java.io.File
 import org.slf4j.Logger
 import java.lang.management.ManagementFactory
 import scala.collection.JavaConversions._
-import grizzled.slf4j.Logging
 import java.io.IOException
+import com.typesafe.scalalogging.slf4j.Logging
 
 package object util extends Logging {
 

@@ -1,11 +1,11 @@
 package logcluster.alg
 
-import grizzled.slf4j.Logging
 import logcluster.util.logIfRelevant
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.Cache
 import java.util.concurrent.Callable
 import java.lang.management.ManagementFactory
+import com.typesafe.scalalogging.slf4j.Logging
 
 class CachingDistance(val impl: (IndexedSeq[Any], IndexedSeq[Any], Double) => Double) extends Logging {
 
@@ -20,6 +20,7 @@ class CachingDistance(val impl: (IndexedSeq[Any], IndexedSeq[Any], Double) => Do
   val cache: Cache[(IndexedSeq[Any], IndexedSeq[Any]), java.lang.Double] = 
     CacheBuilder.newBuilder.maximumSize(cacheSize).recordStats.build()
 
+  import scala.language.implicitConversions
   implicit def fn2Callable[A](f: () => A) = new Callable[A] { def call() = f() }
   
   def apply(a: IndexedSeq[Any], b: IndexedSeq[Any], stopDistance: Double): Double = {

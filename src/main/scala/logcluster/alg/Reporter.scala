@@ -6,7 +6,7 @@ import java.io.PrintWriter
 import java.io.PrintStream
 import java.io.FileOutputStream
 import logcluster.util.createDirOrCheckEmpty
-import grizzled.slf4j.Logging
+import com.typesafe.scalalogging.slf4j.Logging
 
 class Reporter(title: String, dir: File) extends Logging {
 

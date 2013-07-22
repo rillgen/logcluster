@@ -5,10 +5,10 @@ import logcluster.util.getExecTime
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import logcluster.util.`package`.BlockingQueueTraversable
-import grizzled.slf4j.Logging
 import logcluster.util.newThread
 import logcluster.util.logIfRelevant
 import java.util.concurrent.atomic.AtomicInteger
+import com.typesafe.scalalogging.slf4j.Logging
 
 /**
  * A parallel processor that does the filtering (many log entries, I/O bound) in a different thread than
