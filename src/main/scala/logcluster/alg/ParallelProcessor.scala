@@ -21,10 +21,9 @@ class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double
   val clusterList = new scala.collection.mutable.HashMap[String, Cluster]
   val (actualComp, potentialComp) = (new AtomicInteger, new AtomicInteger)
 
-  def doIt(lines: Iterator[String]) = {
+  def doIt(lines: Iterator[String]) {
     logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format 
         (preproc.getClass.getSimpleName, minSimil))
-    var errorCount = 0L
     val time = getExecTime {
       val finished = new AtomicBoolean
       val producer = newThread("reader-%s" format logFile) {
@@ -40,6 +39,7 @@ class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double
       }
       producer.setDaemon(true) // So the producer won't be blocked forever if the consumer threw an exception
       producer.start()
+      var errorCount = 0L
       for (line <- new BlockingQueueTraversable(buffer, finished)) {
         classifyEntry(line)
         errorCount += 1
@@ -50,7 +50,6 @@ class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double
         (actualComp.get, potentialComp.get))
     }
     logger.info("Total time: %d seconds" format (time / 1000))
-    errorCount
   }
 
   def classifyEntry(entry: LogEntry) {
