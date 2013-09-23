@@ -4,7 +4,7 @@ name := "logcluster"
 
 scalaVersion := "2.10.0"
 
-version := "0.1-SNAPSHOT"
+version := "0.2-SNAPSHOT"
 
 publishTo := Some("nexus-snapshots" at "http://nexus.despegar.it:8080/nexus/content/repositories/snapshots/")
 

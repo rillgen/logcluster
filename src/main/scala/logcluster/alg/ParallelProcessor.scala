@@ -4,7 +4,7 @@ import logcluster.preproc.Preprocessor
 import logcluster.util.getExecTime
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.atomic.AtomicBoolean
-import logcluster.util.`package`.BlockingQueueTraversable
+import logcluster.util.BlockingQueueTraversable
 import logcluster.util.newThread
 import logcluster.util.logIfRelevant
 import java.util.concurrent.atomic.AtomicInteger
@@ -22,7 +22,8 @@ class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double
   val (actualComp, potentialComp) = (new AtomicInteger, new AtomicInteger)
 
   def doIt(lines: Iterator[String]) = {
-    logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format (preproc.getClass.getSimpleName, minSimil))
+    logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format 
+        (preproc.getClass.getSimpleName, minSimil))
     var errorCount = 0L
     val time = getExecTime {
       val finished = new AtomicBoolean
@@ -48,7 +49,6 @@ class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double
       logger.info("Did %d comparisions between entries and clusters (out of %d possible)" format
         (actualComp.get, potentialComp.get))
     }
-    reporter.produceReport(time)
     logger.info("Total time: %d seconds" format (time / 1000))
     errorCount
   }
