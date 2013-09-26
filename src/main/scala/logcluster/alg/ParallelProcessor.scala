@@ -9,6 +9,7 @@ import logcluster.util.newThread
 import logcluster.util.logIfRelevant
 import java.util.concurrent.atomic.AtomicInteger
 import com.typesafe.scalalogging.slf4j.Logging
+import java.util.concurrent.BlockingQueue
 
 /**
  * A parallel processor that does the filtering (many log entries, I/O bound) in a different thread than
@@ -17,33 +18,45 @@ import com.typesafe.scalalogging.slf4j.Logging
  */
 class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double, reporter: Reporter) extends Logging {
 
-  val buffer = new LinkedBlockingQueue[LogEntry](1000)
   val clusterList = new scala.collection.mutable.HashMap[String, Cluster]
   val (actualComp, potentialComp) = (new AtomicInteger, new AtomicInteger)
 
   def doIt(lines: Iterator[String]) {
-    logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format 
-        (preproc.getClass.getSimpleName, minSimil))
+    logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format
+      (preproc.getClass.getSimpleName, minSimil))
+    val buffer = new LinkedBlockingQueue[LogEntry](1000)
+    val finished = new AtomicBoolean
+    val producer = newThread(s"reader-$logFile") {
+      try {
+        var i = 0L
+        for (line <- lines.map(preproc(_))) {
+          logIfRelevant(i + 1)(c => logger.debug(s"Processed $c lines"))
+          line.foreach(buffer.put(_))
+        }
+        logger.info(s"Preprocessing finished. Total entry count: $i")
+        reporter.totalEntryCount = i
+      } finally finished.set(true)
+    }
+    producer.setDaemon(true) // So the producer won't be blocked forever if the consumer threw an exception
+    producer.start()
+    doClustering(new BlockingQueueTraversable(buffer, finished))
+  }
+  
+  def doClusteringAsync(errors: Traversable[LogEntry]) {
+    val consumer = newThread(s"reader-$logFile") {
+      doClustering(errors)
+    }
+    consumer.setDaemon(true)
+    consumer.start()
+  }
+  
+  def doClustering(errors: Traversable[LogEntry]) {
     val time = getExecTime {
-      val finished = new AtomicBoolean
-      val producer = newThread("reader-%s" format logFile) {
-        try {
-          var i = 0L
-          for (line <- lines.map(preproc(_))) {
-            logIfRelevant(i + 1)(c => logger.debug("Processed %d lines" format c))
-            line.foreach(buffer.put(_))
-          }
-          logger.info("Preprocessing finished. Total entry count: %d" format i)
-          reporter.totalEntryCount = i
-        } finally finished.set(true)
-      }
-      producer.setDaemon(true) // So the producer won't be blocked forever if the consumer threw an exception
-      producer.start()
       var errorCount = 0L
-      for (line <- new BlockingQueueTraversable(buffer, finished)) {
+      for (line <- errors) {
         classifyEntry(line)
         errorCount += 1
-        logIfRelevant(errorCount)(c => logger.debug("Processed %d errors" format c))
+        logIfRelevant(errorCount)(c => logger.debug(s"Processed $c errors"))
       }
       logger.info("Clustering finished: %d errors and %d clusters." format (errorCount, clusterList.size))
       logger.info("Did %d comparisions between entries and clusters (out of %d possible)" format
