@@ -16,7 +16,7 @@ import java.util.concurrent.BlockingQueue
  * the clustering (a few log entries, CPU bound) so both tasks can advance simultaneously without waiting
  * each other for every line
  */
-class ParallelProcessor(logFile: String, preproc: Preprocessor, minSimil: Double, reporter: Reporter) extends Logging {
+class ParallelProcessor(val logFile: String, val preproc: Preprocessor, val minSimil: Double, val reporter: Reporter) extends Logging {
 
   val clusterList = new scala.collection.mutable.HashMap[String, Cluster]
   val (actualComp, potentialComp) = (new AtomicInteger, new AtomicInteger)

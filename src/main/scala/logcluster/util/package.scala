@@ -28,7 +28,7 @@ package object util extends Logging {
    * A Traversable over a blocking queue that blocks in each read, except the queue has been marked as finished 
    * (in which case ends).
    */
-  class BlockingQueueTraversable[A](queue: BlockingQueue[A], finished: AtomicBoolean) extends Traversable[A] {
+  class BlockingQueueTraversable[A](queue: BlockingQueue[A], val finished: AtomicBoolean = new AtomicBoolean) extends Traversable[A] {
     def foreach[U](f: (A) => U) {
       while (!finished.get || !queue.isEmpty) {
         val elem = queue.poll(100, TimeUnit.MILLISECONDS)
