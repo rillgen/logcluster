@@ -38,9 +38,11 @@ object FinalReporter {
       val odd = index % 2 == 1
       val rowClass = if (odd) "odd" else ""
       val id = cluster.getName
-      val example = escape(readFirst(cluster).take(350))
-      val size = clustersSize(cluster)
-      file.write(s"""<tr class="$rowClass"><td>$size</td><td><a href="$id">$id</a></td><td class="example">${example}...</td></tr>""")
+      readFirst(cluster).foreach { first =>
+        val example = escape(first.take(350))
+        val size = clustersSize(cluster)
+        file.write(s"""<tr class="$rowClass"><td>$size</td><td><a href="$id">$id</a></td><td class="example">${example}...</td></tr>""")
+      }
     }
     file.write("</tbody>")
     file.write("</table>")
@@ -52,7 +54,15 @@ object FinalReporter {
   
   def countMembers(clusterFile: File) = using(Source.fromFile(clusterFile))(_.getLines.size)
   
-  def readFirst(clusterFile: File) = using(Source.fromFile(clusterFile))(_.getLines.next)
+  def readFirst(clusterFile: File) = {
+    using(Source.fromFile(clusterFile)) { source =>
+      val it = source.getLines
+      if (it.hasNext)
+        Some(it.next())
+      else
+        None
+    }
+  }
   
   def escape(str: String) = str.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 
