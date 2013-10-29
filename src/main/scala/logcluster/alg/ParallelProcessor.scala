@@ -10,17 +10,25 @@ import logcluster.util.logIfRelevant
 import java.util.concurrent.atomic.AtomicInteger
 import com.typesafe.scalalogging.slf4j.Logging
 import java.util.concurrent.BlockingQueue
+import scala.collection.mutable
 
 /**
  * A parallel processor that does the filtering (many log entries, I/O bound) in a different thread than
  * the clustering (a few log entries, CPU bound) so both tasks can advance simultaneously without waiting
  * each other for every line
  */
-class ParallelProcessor(val logFile: String, val preproc: Preprocessor, val minSimil: Double, val reporter: Reporter) extends Logging {
+class ParallelProcessor(
+    val logFile: String, 
+    val preproc: Preprocessor, 
+    val minSimil: Double, 
+    val reporter: Reporter,
+    initialClusterList: Map[String, Cluster] = Map[String, Cluster]()
+  ) extends Logging {
 
-  val clusterList = new scala.collection.mutable.HashMap[String, Cluster]
   val (actualComp, potentialComp) = (new AtomicInteger, new AtomicInteger)
 
+  val clusterList = mutable.Map(initialClusterList.toSeq: _*)
+  
   def doIt(lines: Iterator[String]) {
     logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format
       (preproc.getClass.getSimpleName, minSimil))
@@ -72,7 +80,7 @@ class ParallelProcessor(val logFile: String, val preproc: Preprocessor, val minS
       case None => {
         val cluster = Cluster(entry, clusterList.size, minSimil)
         clusterList += cluster.id -> cluster
-        reporter.newCluster(cluster)
+        reporter.newCluster(cluster.id)
         addToCluster(cluster, entry)
         logIfRelevant(clusterList.size)(c => logger.debug("Found %d clusters" format c))
       }
@@ -81,7 +89,7 @@ class ParallelProcessor(val logFile: String, val preproc: Preprocessor, val minS
 
   def addToCluster(cluster: Cluster, entry: LogEntry) {
     cluster.addEntry(entry)
-    reporter.addToCluster(cluster, entry.original)
+    reporter.addToCluster(cluster.id, entry.original)
   }
 
   /*

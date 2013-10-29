@@ -5,30 +5,52 @@ import java.io.PrintStream
 import java.io.FileOutputStream
 import logcluster.util.createDirOrCheckEmpty
 import com.typesafe.scalalogging.slf4j.Logging
+import java.io.IOException
+import scala.collection.mutable
 
-class Reporter(val title: String, val dir: File) extends Logging {
+class Reporter(val title: String, val dir: File, append: Boolean = false) extends Logging {
 
-  createDirOrCheckEmpty(dir)
+  if (append)
+    Reporter.createDirIfNecessary(dir)
+  else
+    createDirOrCheckEmpty(dir)
+  
   logger.info("Saving clusters in directory " + dir)
 
-  val clusters = new scala.collection.mutable.HashMap[String, (Cluster, PrintStream)]
+  val clusters = mutable.HashMap[String, PrintStream]()
 
   var totalEntryCount = 0L
   
-  def newCluster(cluster: Cluster) {
-    val file =  new PrintStream(new FileOutputStream(new File(dir, cluster.id)))
-    clusters += cluster.id -> (cluster, file)
+  def newCluster(clusterId: String) {
+    // Do nothing, file is created in the first addition
   }
 
-  def addToCluster(cluster: Cluster, entry: String) {
-    val (_, stream) = clusters(cluster.id)
+  def addToCluster(clusterId: String, entry: String) {
+    val stream = clusters.get(clusterId) match {
+      case Some(existing) => existing
+      case None =>
+        val newStream = new PrintStream(new FileOutputStream(new File(dir, clusterId), append))
+        clusters += clusterId -> newStream
+        newStream
+    }
     stream.println(entry)
     stream.flush()
   }
 
   def close() = {
-    for ((_, stream) <- clusters.values)
+    for (stream <- clusters.values)
       stream.close()
+  }
+  
+}
+
+object Reporter {
+    
+  def createDirIfNecessary(dir: File) {
+    dir.mkdirs()
+    val list = dir.list
+    if (list == null)
+      throw new IOException("Cannot create or access directory %s" format dir);
   }
   
 }
