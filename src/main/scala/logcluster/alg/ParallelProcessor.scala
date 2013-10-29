@@ -29,6 +29,10 @@ class ParallelProcessor(
 
   val clusterList = mutable.Map(initialClusterList.toSeq: _*)
   
+  // These work as a protection against very long log entries. 
+  val maxLogSize = 2500
+  def trimLog(line: String) = line.substring(0, math.min(maxLogSize, line.size))
+  
   def doIt(lines: Iterator[String]) {
     logger.info("Starting clustering using preprocessor %s and minimum similarity %.2f" format
       (preproc.getClass.getSimpleName, minSimil))
@@ -37,7 +41,7 @@ class ParallelProcessor(
     val producer = newThread(s"reader-$logFile") {
       try {
         var i = 0L
-        for (line <- lines.map(preproc(_))) {
+        for (line <- lines.map(l => preproc(trimLog(l)))) {
           logIfRelevant(i + 1)(c => logger.debug(s"Processed $c lines"))
           line.foreach(buffer.put(_))
         }
