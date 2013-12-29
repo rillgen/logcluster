@@ -63,6 +63,7 @@ class ParallelProcessor(
   }
   
   def doClustering(errors: Traversable[LogEntry]) {
+    try {
     val time = getExecTime {
       var errorCount = 0L
       for (line <- errors) {
@@ -75,6 +76,9 @@ class ParallelProcessor(
         (actualComp.get, potentialComp.get))
     }
     logger.info("Total time: %d seconds" format (time / 1000))
+    } finally {
+      reporter.close()
+    }
   }
 
   def classifyEntry(entry: LogEntry) {
