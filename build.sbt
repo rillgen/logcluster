@@ -2,19 +2,13 @@ organization := "com.despegar"
 
 name := "logcluster"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.12.11"
 
-version := "0.3-SNAPSHOT"
+version := "0.4-SNAPSHOT"
 
-//publishTo := Some("snapshots" at "http://nexus.despegar.it:8080/nexus/content/repositories/snapshots/")
-publishTo := Some("snapshots" at "http://nexus:8080/nexus/content/repositories/snapshots-miami")
-
-libraryDependencies ++= 
-  "com.typesafe" %% "scalalogging-slf4j" % "1.0.1" ::
-  "com.google.guava" % "guava" % "15.0" ::
-  "joda-time" % "joda-time" % "2.3" ::
-  // Required by guava
-  "com.google.code.findbugs" % "jsr305" % "1.3.+" :: 
+libraryDependencies ++=
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2" ::
+  "com.github.blemale" %% "scaffeine" % "3.1.0" % "compile" ::
   Nil
  
 scalacOptions ++= Seq("-deprecation", "-feature", "-language:reflectiveCalls")
